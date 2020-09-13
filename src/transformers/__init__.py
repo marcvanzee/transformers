@@ -83,7 +83,12 @@ from .file_utils import (
     add_start_docstrings,
     cached_path,
     is_apex_available,
+<<<<<<< HEAD
     is_datasets_available,
+=======
+    is_flax_available,
+    is_nlp_available,
+>>>>>>> a09dfdc7211b92012d0a82a034fe8a6bee8b4dfe
     is_psutil_available,
     is_py3nvml_available,
     is_tf_available,

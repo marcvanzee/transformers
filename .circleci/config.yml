@@ -81,9 +81,9 @@ jobs:
             - run: pip install .[sklearn,tf-cpu,torch,testing]
             - run: pip install codecov pytest-cov
             - save_cache:
-                key: v0.3-{{ checksum "setup.py" }}
-                paths:
-                    - '~/.cache/pip'
+                  key: v0.3-{{ checksum "setup.py" }}
+                  paths:
+                      - '~/.cache/pip'
             - run: python -m pytest -n 8 --dist=loadfile -rA -s ./tests/ --cov  | tee output.txt
             - run: codecov
             - store_artifacts:
@@ -137,8 +137,24 @@ jobs:
                       - '~/.cache/pip'
             - run: python -m pytest -n 8 --dist=loadfile -rA -s ./tests/ | tee output.txt
             - store_artifacts:
-               path: ~/transformers/output.txt
-               destination: test_output.txt
+                  path: ~/transformers/output.txt
+                  destination: test_output.txt
+    run_tests_flax:
+        working_directory: ~/transformers
+        docker:
+            - image: circleci/python:3.7
+        environment:
+            OMP_NUM_THREADS: 1
+        resource_class: xlarge
+        parallelism: 1
+        steps:
+            - checkout
+            - run: pip install --upgrade pip
+            - run: pip install git+https://github.com/huggingface/nlp
+            - run: sudo pip install .[flax,sklearn,torch,testing]
+            - run: sudo pip install codecov pytest-cov
+            - run: python -m pytest -n 8 --dist=loadfile -s -v ./tests/ --cov
+            - run: codecov
     run_tests_custom_tokenizers:
         working_directory: ~/transformers
         docker:
@@ -303,6 +319,7 @@ workflows:
             - run_tests_torch_and_tf
             - run_tests_torch
             - run_tests_tf
+            - run_tests_flax
             - build_doc
             - deploy_doc: *workflow_filters
     tpu_testing_jobs:

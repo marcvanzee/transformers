@@ -34,10 +34,12 @@ from .utils import logging
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 
+ENV_VARS_TRUE_VALUES = ("1", "ON", "YES", "AUTO")
+
 try:
     USE_TF = os.environ.get("USE_TF", "AUTO").upper()
     USE_TORCH = os.environ.get("USE_TORCH", "AUTO").upper()
-    if USE_TORCH in ("1", "ON", "YES", "AUTO") and USE_TF not in ("1", "ON", "YES"):
+    if USE_TORCH in ENV_VARS_TRUE_VALUES and USE_TF not in ("1", "ON", "YES"):
         import torch
 
         _torch_available = True  # pylint: disable=invalid-name
@@ -52,7 +54,7 @@ try:
     USE_TF = os.environ.get("USE_TF", "AUTO").upper()
     USE_TORCH = os.environ.get("USE_TORCH", "AUTO").upper()
 
-    if USE_TF in ("1", "ON", "YES", "AUTO") and USE_TORCH not in ("1", "ON", "YES"):
+    if USE_TF in ENV_VARS_TRUE_VALUES and USE_TORCH not in ("1", "ON", "YES"):
         import tensorflow as tf
 
         assert hasattr(tf, "__version__") and int(tf.__version__[0]) >= 2
@@ -66,7 +68,27 @@ except (ImportError, AssertionError):
 
 
 try:
+<<<<<<< HEAD
     import datasets  # noqa: F401
+=======
+    USE_JAX = os.environ.get("USE_FLAX", "AUTO").upper()
+
+    if USE_JAX in ENV_VARS_TRUE_VALUES:
+        import flax
+        import jax
+
+        logger.info("JAX version {}, Flax: available".format(jax.__version__))
+        logger.info("Flax available: {}".format(flax))
+        _flax_available = True
+    else:
+        _flax_available = False
+except ImportError:
+    _flax_available = False  # pylint: disable=invalid-name
+
+
+try:
+    import nlp  # noqa: F401
+>>>>>>> a09dfdc7211b92012d0a82a034fe8a6bee8b4dfe
 
     _datasets_available = True
 
@@ -149,6 +171,10 @@ def is_torch_available():
 
 def is_tf_available():
     return _tf_available
+
+
+def is_flax_available():
+    return _flax_available
 
 
 def is_torch_tpu_available():
