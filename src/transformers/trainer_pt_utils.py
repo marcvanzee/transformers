@@ -112,7 +112,7 @@ def find_batch_size(tensors):
             result = find_batch_size(t)
             if result is not None:
                 return result
-    elif isinstance(tensors, dict):
+    elif isinstance(tensors, (dict, BatchEncoding)):
         for key, value in tensors.items():
             result = find_batch_size(value)
             if result is not None:
@@ -495,7 +495,7 @@ def get_length_grouped_indices(lengths, batch_size, mega_batch_mult=None, genera
     # Switch to put the longest element in first position
     megabatches[0][0], megabatches[max_idx][0] = megabatches[max_idx][0], megabatches[0][0]
 
-    return sum(megabatches, [])
+    return [i for megabatch in megabatches for i in megabatch]
 
 
 class LengthGroupedSampler(Sampler):
@@ -510,6 +510,7 @@ class LengthGroupedSampler(Sampler):
         batch_size: int,
         lengths: Optional[List[int]] = None,
         model_input_name: Optional[str] = None,
+        generator=None,
     ):
         self.dataset = dataset
         self.batch_size = batch_size
@@ -525,12 +526,13 @@ class LengthGroupedSampler(Sampler):
                 )
             lengths = [len(feature[self.model_input_name]) for feature in dataset]
         self.lengths = lengths
+        self.generator = generator
 
     def __len__(self):
         return len(self.lengths)
 
     def __iter__(self):
-        indices = get_length_grouped_indices(self.lengths, self.batch_size)
+        indices = get_length_grouped_indices(self.lengths, self.batch_size, generator=self.generator)
         return iter(indices)
 
 
